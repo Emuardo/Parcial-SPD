@@ -1,4 +1,3 @@
-~~~ C
 //   EMILIANO CENTURION Y MORENA CASTILLO
 //   DIVISION 1°G TURNO NOCHE
 //   PRIMERA PARTE PARCIAL SISTEMA DE PROCESAMIENTO DE DATOS
@@ -245,4 +244,3 @@ void apagarDisplays(){
    digitalWrite(G, LOW);
 }
 
-~~~
