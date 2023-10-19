@@ -1,3 +1,8 @@
+//   EMILIANO CENTURION
+//   DIVISION 1°G TURNO NOCHE
+//   TERCERA PARTE PARCIAL SISTEMA DE PROCESAMIENTO DE DATOS
+
+//DEFINICION DE PINES
 #define A 13
 #define B 12
 #define C 11
@@ -18,23 +23,28 @@
 #define SENSOR A2
 #define FOTORESISTENCIA A1
 
-int contadorEnteros = 0;
-int contadorPrimos = 2;
+//VARIABLES
+int contadorEnteros = 0;  //Guarda el valor del contador de numeros enteros
+int contadorPrimos = 2;   //Guarda el valor del contador de numeros primos
 
-int estadoBotonIncrementar = 1;
-int estadoBotonDecrementar = 1;
+int estadoBotonIncrementar = 1; //Guarda el estado actual del boton incrementar
+int estadoBotonDecrementar = 1;	//Guarda el estado actual del boton decrementar
 
 
-int estadoAnteriorIncrementar = 1;
-int estadoAnteriorDecrementar = 1;
+int estadoAnteriorIncrementar = 1;  //Guarda el estado anterior del boton incrementar
+int estadoAnteriorDecrementar = 1;   //Guarda el estado anterior del boton decrementar
 
-int posicionSwitch = 0;
+int posicionSwitch = 0; //Guarda el modo en el que se encuentra el SWITCH
 
-int temperatura = 0;
-int lectura = 0;
-bool banderaPrendido = false;
-int opcion;
-int luzDiaNocheAnterior = 0;
+int temperatura = 0;             //Guarda los valores de mapeado de la temperatura
+int lectura = 0;                //Guarda a la variable que lee el estado del sensor
+bool banderaPrendido = false;   //Guarda el estado de la bandera para prender el circuito
+int opcion;                    //Guarda la opcion seleccionada por el usuario
+ 
+
+// FUNCION: SETUP
+// La funcion tiene el objetivo configurar y asignar los pines 
+
 
 void setup()
 {
@@ -60,6 +70,10 @@ void setup()
   Serial.println("1 - Encender Motor");
   Serial.println("2 - Apagar Motor");
 }
+
+// FUNCION: LOOP
+// La funcion tiene como objetivo ser el bucle principal del programa, la cual contiene las condiciones de 
+// manejo del motor, la temperatura y los contadores de numeros enteros y primos 
 
 void loop() {
   lectura = analogRead(SENSOR);
@@ -140,6 +154,11 @@ void loop() {
   }
 }
 }
+
+//FUNCION: MOSTRAR NUMERO ENTERO EN DISPLAYS
+//La funcion tiene como objetivo pasale a los displays el numero entero 
+//que debe mostrar a traves de los segmentos 
+
 void mostrarNumeroEnteroEnDisplays() {
   
     digitalWrite(UNIDAD, HIGH);
@@ -153,7 +172,9 @@ void mostrarNumeroEnteroEnDisplays() {
     encenderDisplays(DECENA);
   }
  
-
+//FUNCION: MOSTRAR NUMERO PRIMO EN DISPLAYS
+//La funcion tiene como objetivo pasale a los displays el numero primo
+//que debe mostrar a traves de los segmentos 
 
 void mostrarNumeroPrimoEnDisplays() {
   digitalWrite(UNIDAD, HIGH);
@@ -166,6 +187,10 @@ void mostrarNumeroPrimoEnDisplays() {
   encenderNumeroEnDisplay(contadorPrimos / 10);  // DECENAS
   encenderDisplays(DECENA);
 }
+
+//FUNCION: ES PRIMO
+//Esta función determina si un número entero dado es primo o no.
+//Devuelve verdadero si el número es primo y falso si no lo es. 
 
 bool esPrimo(int numero) {
   if (numero < 2) {
@@ -180,6 +205,10 @@ bool esPrimo(int numero) {
   }
   return true;
 }
+
+// FUNCION: BOTON PRESIONADO
+// La funcion tiene como objetivo generar el anti-rebote de los botones devolviendo a traves del return 
+// la evaluacion mediante condiciones del estado del boton actual
 
 int botonPresionado() {
   estadoBotonIncrementar = digitalRead(INCREMENTAR);
@@ -204,6 +233,10 @@ int botonPresionado() {
   }
 }
 
+// FUNCION: ENCENDER DISPLAYS
+// La funcion tiene como objetivo controlar la visualizacion de los displays a traves de la
+// UNIDAD y DECENA, apagando y prendiendo los mismos dependiendo de su posicion
+
 void encenderDisplays(int posicion) {
   if (posicion == UNIDAD) {
     digitalWrite(DECENA, HIGH);
@@ -215,6 +248,10 @@ void encenderDisplays(int posicion) {
     delay(TIMEDISPLAYON);
   }
 }
+
+//FUNCION: ENCENDER NUMERO EN DISPLAY
+// La funcion tiene como objetivo el manejo de los segmentos
+//del display dependiendo del numero del contador (UNIDAD Y DECENA)
 
 void encenderNumeroEnDisplay(int numero) {
   apagarDisplays();
@@ -290,6 +327,10 @@ void encenderNumeroEnDisplay(int numero) {
       break;
   }
 }
+
+// FUNCION: APAGAR DISPLAY
+// La funcion tiene como objetivo apagar todos los segmentos del display
+
 
 void apagarDisplays() {
     digitalWrite(A, LOW);
