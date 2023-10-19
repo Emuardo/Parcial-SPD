@@ -51,3 +51,7 @@ void loop()
 
  ![PARCIAL PARTE 2 MOTORES](https://github.com/Emuardo/Parcial-SPD-/assets/107709876/1fb6b24f-8fd8-475c-9315-2788177c8b54)
 
+# Descripcion:
+
+El proyecto es un contador de números enteros y primos que va de 0 a 99  hecho con dos diplays de siete segmentos, utilizamos dos botones los cuales aumentan y disminuyen numeros. Para validar cual de los contadores se quiere utilizar, lo realizamos mediante un interruptor, que dependiendo su estado, contara primos o enteros.
+Por otro lado utilizamos motores y sensores de temperatura para condicionar el funcionamiento del circuito, es decir si el motor se encuentra encendido y la temperatura se encuentra entre 0° y 20°, todo el circuito funciona.
