@@ -1,0 +1,348 @@
+#define A 13
+#define B 12
+#define C 11
+#define D 10
+#define E 9
+#define F 8
+#define G 7
+
+#define INCREMENTAR 4
+#define DECREMENTAR 3
+#define INTERRUPTOR 2
+#define UNIDAD A4
+#define DECENA A5
+#define TIMEDISPLAYON 10
+
+#define MOTOR A3 
+#define SENSOR_TEMP A2
+
+#define FOCO 6
+#define SENSOR A0
+
+// VARIABLES
+int contadorEnteros = 0;              //Guarda el valor del contador de numeros enteros
+int contadorPrimos = 2;               //Guarda el valor del contador de numeros primos
+
+int estadoBotonIncrementar = 1;       //Guarda el estado actual del boton incrementar
+int estadoBotonDecrementar = 1;       //Guarda el estado actual del boton decrementar
+
+
+int estadoAnteriorIncrementar = 1;    //Guarda el estado anterior del boton incrementar
+int estadoAnteriorDecrementar = 1;    //Guarda el estado anterior del boton decrementar
+
+int posicionSwitch = 0;               //Guarda el modo en el que se encuentra el SWITCH
+
+int temperatura = 0;                  //Guarda los valores de mapeado de la temperatura
+int lectura = 0;                      //Guarda a la variable que lee el estado del sensor
+int opcion;                           //Guarda la opcion seleccionada por el usuario
+int luzPrendida = 500;                //Guarda el valor que debe tener el sensor para que se prenda
+bool banderaPrendido = false;         //Guarda el estado de la bandera para prender el circuito
+
+
+// FUNCION: SETUP
+// La funcion tiene el objetivo configurar y asignar los pines 
+void setup()
+{
+  pinMode(A, OUTPUT);
+  pinMode(B, OUTPUT);
+  pinMode(C, OUTPUT);
+  pinMode(D, OUTPUT);
+  pinMode(E, OUTPUT);
+  pinMode(F, OUTPUT);
+  pinMode(G, OUTPUT);
+  pinMode(INCREMENTAR, INPUT_PULLUP);
+  pinMode(DECREMENTAR, INPUT_PULLUP);
+  pinMode(INTERRUPTOR, INPUT_PULLUP);
+  pinMode(FOCO, OUTPUT);
+  pinMode(MOTOR, OUTPUT);
+  pinMode(UNIDAD, OUTPUT);
+  pinMode(DECENA, OUTPUT);
+  digitalWrite(UNIDAD, 0);
+  digitalWrite(DECENA, 0);
+  encenderNumeroEnDisplay(0);
+  Serial.begin(9600);
+  Serial.println("Ingrese una opcion:");
+  Serial.println("1 - Encender Motor");
+  Serial.println("2 - Apagar Motor");
+}
+
+// EXPLICACION DEL SENSOR DE LUZ AMBIENTAL CON EL FOCO:
+// La logica tras implementar este instrumento en nuestro circuito se basa en que si 
+// el motor se encuentra encendido y si la temperatura se encuentra en condiciones de funcionamiento
+// (de 0° a 20°) la luz tenga la capacidad de encender siempre y cuando su valor sea mayor a 500, de forma
+// contraria, puede prender todo menos la luz, de forma de que no interfiera en el funcionamiento normal
+// del circuito con los contadores y displays
+
+
+
+// FUNCION: LOOP
+// La funcion tiene como objetivo ser el bucle principal del programa, la cual contiene las condiciones de 
+// manejo del motor, la temperatura, el sensor de luz ambiental junto con el foco
+// y los contadores de numeros enteros y primos 
+void loop() {
+  lectura = analogRead(SENSOR_TEMP);
+  temperatura = map(lectura, 20, 358, -40, 125);
+  posicionSwitch = digitalRead(INTERRUPTOR);
+  int valorLuz = analogRead(SENSOR);
+  int boton = botonPresionado();
+
+  if (Serial.available() > 0) {
+    opcion = Serial.read();
+    if (opcion == '1') {
+      Serial.println("Motor prendido (Temp. Funcionamiento -> 0 C a 20 C)");
+      banderaPrendido = true;
+    } else if (opcion == '2') {
+      digitalWrite(MOTOR, LOW);
+      digitalWrite(UNIDAD, HIGH);
+      digitalWrite(DECENA, HIGH);
+      digitalWrite(FOCO, LOW);
+      Serial.println("Motor apagado");
+      banderaPrendido = false;
+    } else {
+      Serial.println("INVALIDO, Ingrese opción correcta");
+      
+    }
+  }
+
+  if (banderaPrendido) {
+    if (temperatura >= 0 && temperatura <= 20 && valorLuz > luzPrendida) {
+      digitalWrite(FOCO, HIGH);
+    } else {
+      digitalWrite(FOCO, LOW);
+    }
+    if (temperatura >= 0 && temperatura <= 20) {
+        if (posicionSwitch == HIGH) {
+          if (boton == INCREMENTAR) {
+            if (contadorEnteros < 100) {
+              contadorEnteros++;
+            } else {
+              contadorEnteros = 0;
+            }
+          }
+          if (boton == DECREMENTAR) {
+            if (contadorEnteros > 0) {
+              contadorEnteros--;
+            } else {
+              contadorEnteros = 99;
+            }
+          }
+          mostrarNumeroEnteroEnDisplays();
+    } else {
+      if (boton == INCREMENTAR) {
+        while (true) {
+          if (contadorPrimos < 100) {
+            contadorPrimos++;
+            if (esPrimo(contadorPrimos)) {
+              break;
+            }
+          } else {
+            contadorPrimos = 2;
+            break;
+          }
+        }
+      }
+      if (boton == DECREMENTAR) {
+        while (true) {
+          if (contadorPrimos > 2) {
+            contadorPrimos--;
+            if (esPrimo(contadorPrimos)) {
+              break;
+            }
+          } else {
+            contadorPrimos = 97;
+            break;
+          }
+        }
+      }
+      mostrarNumeroPrimoEnDisplays();
+    }
+  }
+  else{
+      digitalWrite(UNIDAD, HIGH);
+      digitalWrite(DECENA, HIGH);
+      digitalWrite(FOCO, LOW);
+  }
+ }
+}
+
+
+//FUNCION: MOSTRAR NUMERO ENTERO EN DISPLAYS
+//La funcion tiene como objetivo pasale a los displays el numero entero 
+//que debe mostrar a traves de los segmentos 
+void mostrarNumeroEnteroEnDisplays() {
+  digitalWrite(UNIDAD, HIGH);
+  digitalWrite(DECENA, HIGH);
+  encenderNumeroEnDisplay(contadorEnteros % 10);  // UNIDADES
+  encenderDisplays(UNIDAD);
+
+  digitalWrite(UNIDAD, HIGH);
+  digitalWrite(DECENA, HIGH);
+  encenderNumeroEnDisplay(contadorEnteros / 10);  // DECENAS
+  encenderDisplays(DECENA);
+}
+
+
+//FUNCION: MOSTRAR NUMERO PRIMO EN DISPLAYS
+//La funcion tiene como objetivo pasale a los displays el numero primo
+//que debe mostrar a traves de los segmentos 
+void mostrarNumeroPrimoEnDisplays() {
+  digitalWrite(UNIDAD, HIGH);
+  digitalWrite(DECENA, HIGH);
+  encenderNumeroEnDisplay(contadorPrimos % 10);  // UNIDADES
+  encenderDisplays(UNIDAD);
+  
+  digitalWrite(UNIDAD, HIGH);
+  digitalWrite(DECENA, HIGH);
+  encenderNumeroEnDisplay(contadorPrimos / 10);  // DECENAS
+  encenderDisplays(DECENA);
+}
+
+//FUNCION: ES PRIMO
+//Esta función determina si un número entero dado es primo o no.
+//Devuelve verdadero si el número es primo y falso si no lo es. 
+bool esPrimo(int numero) {
+  if (numero < 2) {
+    return false;
+  }
+  if (numero > 2) {
+    for (int i = 2; i * 2 <= numero; i++) {
+      if (numero % i == 0) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+// FUNCION: BOTON PRESIONADO
+// La funcion tiene como objetivo generar el anti - rebote de los botones devolviendo a traves del return 
+// la evaluacion mediante condiciones del estado del boton actual
+int botonPresionado() {
+  estadoBotonIncrementar = digitalRead(INCREMENTAR);
+  estadoBotonDecrementar = digitalRead(DECREMENTAR);
+
+  
+  if (estadoBotonIncrementar) { 
+    estadoAnteriorIncrementar = 1;
+  }
+  if (estadoBotonDecrementar) {
+    estadoAnteriorDecrementar = 1;
+  }
+  
+  if (estadoBotonIncrementar == 0 && estadoBotonIncrementar != estadoAnteriorIncrementar) {
+    estadoAnteriorIncrementar = estadoBotonIncrementar;
+    return INCREMENTAR;
+  } else if (estadoBotonDecrementar == 0 && estadoBotonDecrementar != estadoAnteriorDecrementar) {
+    estadoAnteriorDecrementar = estadoBotonDecrementar;
+    return DECREMENTAR;
+  }
+}
+
+
+// FUNCION: ENCENDER DISPLAYS
+// La funcion tiene como objetivo controlar la visualizacion de los displays a traves de la
+// UNIDAD y DECENA, apagando y prendiendo los mismos dependiendo de su posicion
+
+void encenderDisplays(int posicion) {
+  if (posicion == UNIDAD) {
+    digitalWrite(DECENA, HIGH);
+    digitalWrite(UNIDAD, LOW);
+    delay(TIMEDISPLAYON);
+  } else {
+    digitalWrite(DECENA, LOW);
+    digitalWrite(UNIDAD, HIGH);
+    delay(TIMEDISPLAYON);
+  }
+}
+
+
+//FUNCION: ENCENDER NUMERO EN DISPLAY
+// La funcion tiene como objetivo el manejo de los segmentos
+//del display dependiendo del numero del contador (UNIDAD Y DECENA)
+void encenderNumeroEnDisplay(int numero) {
+  apagarDisplays();
+  switch (numero){
+    case 1:
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      break;
+    case 2:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(E, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 3:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 4:
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(F, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 5:
+      digitalWrite(A, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(F, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 6:
+      digitalWrite(A, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(E, HIGH);
+      digitalWrite(F, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 7:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      break;
+    case 8:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(E, HIGH);
+      digitalWrite(F, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 9:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(F, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 0:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(E, HIGH);
+      digitalWrite(F, HIGH);
+      break;
+  }
+}
+
+
+// FUNCION: APAGAR DISPLAY
+// La funcion tiene como objetivo apagar todos los segmentos del display
+void apagarDisplays() {
+    digitalWrite(A, LOW);
+    digitalWrite(B, LOW);
+    digitalWrite(C, LOW);
+    digitalWrite(D, LOW);
+    digitalWrite(E, LOW);
+    digitalWrite(F, LOW);
+    digitalWrite(G, LOW);
+}
