@@ -1,5 +1,5 @@
 # Parcial-SPD-
-En este repositorio de Github se pueden encontrar la primera, la segunda y la tercera parte del primer parcial de SPD
+En este repositorio de Github se pueden encontrar la primera, la segunda y la tercera parte de cada uno de los integrantes del primer parcial de la materia Sistema de Procesamiento de Datos
 
 ## Integrantes: 
 - Emiliano David Centurion
