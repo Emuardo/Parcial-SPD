@@ -139,3 +139,7 @@ void loop() {
 }
 
 ~~~
+
+## :robot: Link al proyecto:
+
+[Proyecto](https://www.tinkercad.com/things/3Pr4BMTk4Xz?sharecode=7UqGUWYF5dkLmTgSxbVc07WBP5TALihZQU5LAZrZz6Q)
