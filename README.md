@@ -58,6 +58,8 @@ Por otro lado utilizamos motores y sensores de temperatura para condicionar el f
 
 # Funcion principal del proyecto:
 
+Nuentra funcion principal es el LOOP la cual tiene como objetivo ser el bucle principal del programa, dentro de ella se encuentran las condiciones de manejo del motor, la temperatura y los contadores de numeros enteros y primos
+
 ~~~ C
 void loop() {
   lectura = analogRead(SENSOR);
