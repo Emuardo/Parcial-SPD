@@ -1,1 +1,302 @@
+#define A 13
+#define B 12
+#define C 11
+#define D 10
+#define E 9
+#define F 8
+#define G 7
 
+
+#define INCREMENTAR 4
+#define DECREMENTAR 3
+#define INTERRUPTOR 2
+#define UNIDAD A4
+#define DECENA A5
+#define TIMEDISPLAYON 10
+
+#define MOTOR A3 
+#define SENSOR A2
+#define FOTORESISTENCIA A1
+
+int contadorEnteros = 0;
+int contadorPrimos = 2;
+
+int estadoBotonIncrementar = 1;
+int estadoBotonDecrementar = 1;
+
+
+int estadoAnteriorIncrementar = 1;
+int estadoAnteriorDecrementar = 1;
+
+int posicionSwitch = 0;
+
+int temperatura = 0;
+int lectura = 0;
+bool banderaPrendido = false;
+int opcion;
+int luzDiaNocheAnterior = 0;
+
+void setup()
+{
+  pinMode(A, OUTPUT);
+  pinMode(B, OUTPUT);
+  pinMode(C, OUTPUT);
+  pinMode(D, OUTPUT);
+  pinMode(E, OUTPUT);
+  pinMode(F, OUTPUT);
+  pinMode(G, OUTPUT);
+  pinMode(INCREMENTAR, INPUT_PULLUP);
+  pinMode(DECREMENTAR, INPUT_PULLUP);
+  pinMode(INTERRUPTOR, INPUT_PULLUP);
+  pinMode(MOTOR, OUTPUT);
+  pinMode(FOTORESISTENCIA, INPUT);
+  pinMode(UNIDAD, OUTPUT);
+  pinMode(DECENA, OUTPUT);
+  digitalWrite(UNIDAD, 0);
+  digitalWrite(DECENA, 0);
+  encenderNumeroEnDisplay(0);
+  Serial.begin(9600);
+  Serial.println("Ingrese una opcion:");
+  Serial.println("1 - Encender Motor");
+  Serial.println("2 - Apagar Motor");
+}
+
+void loop() {
+  lectura = analogRead(SENSOR);
+  temperatura = map(lectura, 20, 358, -40, 125);
+  int luzDiaNoche = analogRead(FOTORESISTENCIA);
+  luzDiaNoche = map(luzDiaNoche , 0, 1023, 0, 255);
+  posicionSwitch = digitalRead(INTERRUPTOR);
+  int boton = botonPresionado();
+
+  
+  if (Serial.available() > 0) {
+    opcion = Serial.read();
+    if (opcion == '1') {
+      Serial.println("Motor prendido (Temp. Funcionamiento -> 0 C a 20 C)");
+      banderaPrendido = true;
+    } else if (opcion == '2') {
+      digitalWrite(MOTOR, LOW);
+      digitalWrite(UNIDAD, HIGH);
+      digitalWrite(DECENA, HIGH);
+      Serial.println("Motor apagado");
+      banderaPrendido = false;
+    } else {
+      Serial.println("INVALIDO, Ingrese opción correcta");
+    }
+  }
+
+  if (banderaPrendido) {
+    if (temperatura >= 0 && temperatura <= 20){
+        if (posicionSwitch == HIGH) {
+          if (boton == INCREMENTAR) {
+            if (contadorEnteros < 100) {
+              contadorEnteros++;
+            } else {
+              contadorEnteros = 0;
+            }
+          }
+          if (boton == DECREMENTAR) {
+            if (contadorEnteros > 0) {
+              contadorEnteros--;
+            } else {
+              contadorEnteros = 99;
+            }
+          }
+          mostrarNumeroEnteroEnDisplays();
+    } else {
+      if (boton == INCREMENTAR) {
+        while (true) {
+          if (contadorPrimos < 100) {
+            contadorPrimos++;
+            if (esPrimo(contadorPrimos)) {
+              break;
+            }
+          } else {
+            contadorPrimos = 2;
+            break;
+          }
+        }
+      }
+      if (boton == DECREMENTAR) {
+        while (true) {
+          if (contadorPrimos > 2) {
+            contadorPrimos--;
+            if (esPrimo(contadorPrimos)) {
+              break;
+            }
+          } else {
+            contadorPrimos = 97;
+            break;
+          }
+        }
+      }
+      mostrarNumeroPrimoEnDisplays();
+    }
+  }
+  else{
+      digitalWrite(UNIDAD, HIGH);
+      digitalWrite(DECENA, HIGH);
+  }
+}
+}
+void mostrarNumeroEnteroEnDisplays() {
+  
+    digitalWrite(UNIDAD, HIGH);
+    digitalWrite(DECENA, HIGH);
+    encenderNumeroEnDisplay(contadorEnteros % 10);  // UNIDADES
+    encenderDisplays(UNIDAD);
+
+    digitalWrite(UNIDAD, HIGH);
+    digitalWrite(DECENA, HIGH);
+    encenderNumeroEnDisplay(contadorEnteros / 10);  // DECENAS
+    encenderDisplays(DECENA);
+  }
+ 
+
+
+void mostrarNumeroPrimoEnDisplays() {
+  digitalWrite(UNIDAD, HIGH);
+  digitalWrite(DECENA, HIGH);
+  encenderNumeroEnDisplay(contadorPrimos % 10);  // UNIDADES
+  encenderDisplays(UNIDAD);
+  
+  digitalWrite(UNIDAD, HIGH);
+  digitalWrite(DECENA, HIGH);
+  encenderNumeroEnDisplay(contadorPrimos / 10);  // DECENAS
+  encenderDisplays(DECENA);
+}
+
+bool esPrimo(int numero) {
+  if (numero < 2) {
+    return false;
+  }
+  if (numero > 2) {
+    for (int i = 2; i * 2 <= numero; i++) {
+      if (numero % i == 0) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+int botonPresionado() {
+  estadoBotonIncrementar = digitalRead(INCREMENTAR);
+  estadoBotonDecrementar = digitalRead(DECREMENTAR);
+
+  
+  if (estadoBotonIncrementar) { 
+    estadoAnteriorIncrementar = 1;
+  }
+  if (estadoBotonDecrementar) {
+    estadoAnteriorDecrementar = 1;
+  }
+
+  
+  
+  if (estadoBotonIncrementar == 0 && estadoBotonIncrementar != estadoAnteriorIncrementar) {
+    estadoAnteriorIncrementar = estadoBotonIncrementar;
+    return INCREMENTAR;
+  } else if (estadoBotonDecrementar == 0 && estadoBotonDecrementar != estadoAnteriorDecrementar) {
+    estadoAnteriorDecrementar = estadoBotonDecrementar;
+    return DECREMENTAR;
+  }
+}
+
+void encenderDisplays(int posicion) {
+  if (posicion == UNIDAD) {
+    digitalWrite(DECENA, HIGH);
+    digitalWrite(UNIDAD, LOW);
+    delay(TIMEDISPLAYON);
+  } else {
+    digitalWrite(DECENA, LOW);
+    digitalWrite(UNIDAD, HIGH);
+    delay(TIMEDISPLAYON);
+  }
+}
+
+void encenderNumeroEnDisplay(int numero) {
+  apagarDisplays();
+  switch (numero){
+    case 1:
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      break;
+    case 2:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(E, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 3:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 4:
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(F, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 5:
+      digitalWrite(A, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(F, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 6:
+      digitalWrite(A, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(E, HIGH);
+      digitalWrite(F, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 7:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      break;
+    case 8:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(E, HIGH);
+      digitalWrite(F, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 9:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(F, HIGH);
+      digitalWrite(G, HIGH);
+      break;
+    case 0:
+      digitalWrite(A, HIGH);
+      digitalWrite(B, HIGH);
+      digitalWrite(C, HIGH);
+      digitalWrite(D, HIGH);
+      digitalWrite(E, HIGH);
+      digitalWrite(F, HIGH);
+      break;
+  }
+}
+
+void apagarDisplays() {
+    digitalWrite(A, LOW);
+    digitalWrite(B, LOW);
+    digitalWrite(C, LOW);
+    digitalWrite(D, LOW);
+    digitalWrite(E, LOW);
+    digitalWrite(F, LOW);
+    digitalWrite(G, LOW);
+}
