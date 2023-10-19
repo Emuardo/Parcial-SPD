@@ -5,7 +5,7 @@ En este repositorio de Github se pueden encontrar la primera, la segunda y la te
 - Emiliano David Centurion
 - Morena Castillo
 
-# Proyecto_1 
+# Parte 1: 
 
 ![PARCIAL (1)](https://github.com/Emuardo/Parcial-SPD-/assets/107709876/8dd4c809-1f01-46ee-9358-a1c972241b2a)
 
@@ -46,4 +46,8 @@ void loop()
 ## :robot: Link al proyecto:
 
  [Proyecto](https://www.tinkercad.com/things/211oPD8WYyH?sharecode=1s2QrgWYPXN5x4lo-f2UwmFbJqnRB6irPszFoTnPOPA)
+
+# Parte 2:
+
+ ![PARCIAL PARTE 2 MOTORES](https://github.com/Emuardo/Parcial-SPD-/assets/107709876/1fb6b24f-8fd8-475c-9315-2788177c8b54)
 
